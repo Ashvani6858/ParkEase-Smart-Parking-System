@@ -1,0 +1,21 @@
+{
+  "name": "parkease",
+  "version": "1.0.0",
+  "description": "ParkEase - Smart Parking Management & Booking System",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev": "start npm run dev:backend && start npm run dev:frontend",
+    "build": "npm run build --prefix backend && npm run build --prefix frontend",
+    "test:backend": "npm run test --prefix backend",
+    "test:frontend": "npm run test --prefix frontend",
+    "test": "npm run test:backend && npm run test:frontend",
+    "db:migrate": "cd backend && npx prisma migrate dev",
+    "db:seed": "cd backend && npx prisma db seed"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.4"
+  }
+}

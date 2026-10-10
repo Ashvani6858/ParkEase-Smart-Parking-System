@@ -1,0 +1,34 @@
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Build files
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor and system files
+.vscode/
+.DS_Store
+Thumbs.db
+# AI editor generated files
+**/.agents/
+**/.claude/
+**/.cursor/
+**/.devin/
+
+# Local backup files
+*.backup.*

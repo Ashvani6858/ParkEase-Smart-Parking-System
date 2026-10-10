@@ -1,0 +1,144 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum VehicleType {
+  CAR
+  BIKE
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum SlotStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  DISABLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicles      Vehicle[]
+  bookings      Booking[]
+  notifications Notification[]
+}
+
+model Vehicle {
+  id        String      @id @default(uuid())
+  regNumber String      @unique
+  type      VehicleType
+  model     String
+  color     String?
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  bookings Booking[]
+}
+
+model ParkingLocation {
+  id          String   @id @default(uuid())
+  name        String
+  address     String
+  city        String
+  description String?
+  hourlyRate  Float
+  openTime    String   @default("00:00")
+  closeTime   String   @default("23:59")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  floors ParkingFloor[]
+}
+
+model ParkingFloor {
+  id         String          @id @default(uuid())
+  name       String
+  locationId String
+  location   ParkingLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  slots ParkingSlot[]
+}
+
+model ParkingSlot {
+  id         String       @id @default(uuid())
+  slotNumber String
+  floorId    String
+  floor      ParkingFloor @relation(fields: [floorId], references: [id], onDelete: Cascade)
+  type       VehicleType
+  status     SlotStatus   @default(AVAILABLE)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  bookings Booking[]
+
+  @@unique([floorId, slotNumber])
+}
+
+model Booking {
+  id             String        @id @default(uuid())
+  referenceToken String        @unique @default(uuid())
+
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  vehicleId      String
+  vehicle        Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  slotId         String
+  slot           ParkingSlot   @relation(fields: [slotId], references: [id], onDelete: Restrict)
+
+  startTime      DateTime
+  endTime        DateTime
+
+  status         BookingStatus @default(PENDING_PAYMENT)
+  totalAmount    Float
+
+  paymentStatus  String        @default("PENDING")
+  paymentId      String?
+  paidAt         DateTime?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([slotId, startTime, endTime])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
